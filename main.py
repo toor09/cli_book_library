@@ -11,23 +11,37 @@ def create_dirs(path: str) -> None:
         os.makedirs(path)
 
 
-def download_file(url: str, filename: str) -> None:
+def download_file(url: str, filename: str, mode: str = "wb") -> None:
     """Download file from url."""
     response = requests.get(url=url)
     response.raise_for_status()
 
-    with open(filename, "wb") as file:
-        file.write(response.content)
+    with open(filename, mode) as file:
+        file.write(response.content) \
+            if mode == "wb" else file.write(response.text)
 
 
 def main() -> None:
     """ Cli main entrypoint."""
     settings = Settings()
-    path_dirs = os.path.join(settings.ROOT_PATH, settings.IMG_LOGO_PATH)
-    create_dirs(path=path_dirs)
+    pathes = (
+        os.path.join(settings.ROOT_PATH, settings.IMG_LOGO_PATH),
+        os.path.join(settings.ROOT_PATH, settings.BOOK_PATH)
+    )
+    image_path, book_path = pathes
+
+    for path in pathes:
+        create_dirs(path=path)
+
     download_file(
         url=settings.IMG_URL,
-        filename=os.path.join(path_dirs, settings.IMG_FILENAME)
+        filename=os.path.join(image_path, settings.IMG_FILENAME)
+    )
+
+    download_file(
+        url=f"{settings.SITE_URL_ROOT}/{settings.SITE_URI_TXT}",
+        filename=os.path.join(book_path, settings.BOOK_FILENAME),
+        mode="w"
     )
 
 
