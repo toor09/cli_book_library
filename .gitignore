@@ -1,0 +1,15 @@
+__pycache__
+.mypy_cache/
+.vscode/
+.idea/
+env/
+venv/
+.venv/
+.replit
+.env
+*.pyc
+*.pyd
+*.pyo
+.DS_Store
+Thumbs.db
+downloads/

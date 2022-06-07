@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "cli_book_library"
+version = "0.1.0"
+description = "Cli for download books in .txt files from online book library"
+authors = ["Danil Nikitin <d.nikitin.dev@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+requests = "^2.27.1"
+pydantic = {extras = ["dotenv"], version = "^1.9.1"}
+
+[tool.poetry.dev-dependencies]
+flake8 = "^4.0.1"
+mypy = "^0.961"
+isort = "^5.10.1"
+types-requests = "^2.27.30"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
