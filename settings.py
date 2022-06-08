@@ -7,6 +7,7 @@ class Settings(BaseSettings):
 
     BOOK_FILENAME: str = "arthur_clarke-sands_of_mars.txt"
     BOOK_PATH: Path = Path("books")
+    BOOK_PAGE: AnyHttpUrl
     IMG_FILENAME: str = "dvmn.svg"
     IMG_LOGO_PATH: Path = Path("img/logo/")
     IMG_URL: AnyHttpUrl
