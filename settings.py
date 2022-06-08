@@ -11,6 +11,8 @@ class Settings(BaseSettings):
     IMG_LOGO_PATH: Path = Path("img/logo/")
     IMG_URL: AnyHttpUrl
     ROOT_PATH: Path = Path("downloads/")
+    PARSE_BS4_URL_ROOT: AnyHttpUrl
+    PARSE_BS4_URI_BLOG_POST: str
     SITE_URL_ROOT: AnyHttpUrl
     SITE_URI_TXT: str
 

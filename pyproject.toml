@@ -8,6 +8,8 @@ authors = ["Danil Nikitin <d.nikitin.dev@gmail.com>"]
 python = "^3.8"
 requests = "^2.27.1"
 pydantic = {extras = ["dotenv"], version = "^1.9.1"}
+beautifulsoup4 = "^4.11.1"
+lxml = "^4.9.0"
 
 [tool.poetry.dev-dependencies]
 flake8 = "^4.0.1"
