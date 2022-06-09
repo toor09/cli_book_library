@@ -12,12 +12,19 @@ def parse_book_page(page: Response) -> dict:
     book_cover = soup.find(
         "div", class_="bookimage"
     ).find("a").find("img")["src"]
+    book_comments = soup.find_all("div", class_="texts")
+    book_comments = [
+        book_comment.find_next("span", class_="black").text.strip()
+        for book_comment in book_comments
+    ]
+    book_comments = "\n".join(book_comments)
     book_title, book_author = book_header.text.split("::")
 
     return {
         "author": book_author.strip(),
         "title": book_title.strip(),
-        "img_link": book_cover
+        "img_link": book_cover,
+        "comments": book_comments
     }
 
 
@@ -37,7 +44,8 @@ def main() -> None:
                 print(f"Заголовок: {parsed_book.get('title')}\n"
                       f"Автор: {parsed_book.get('author')}\n"
                       f"Ссылка на обложку: {settings.SITE_URL_ROOT}"
-                      f"{parsed_book.get('img_link')}")
+                      f"{parsed_book.get('img_link')}\n"
+                      f"Комментарии: {parsed_book.get('comments')}")
 
         except HTTPError as exc:
             print(f"Книга с id={book_id} {exc}")
