@@ -1,6 +1,5 @@
 import os
 from typing import Optional
-from uuid import uuid1
 
 import requests
 from pathvalidate import sanitize_filename, sanitize_filepath
@@ -8,39 +7,7 @@ from requests import HTTPError, Response
 
 from settings import Settings
 from tululu import parse_book_page
-
-
-def create_dirs(path: str) -> None:
-    """Create directories from path if not exists."""
-    if not os.path.exists(path):
-        os.makedirs(path)
-
-
-def get_unique_id() -> str:
-    """Get uuid unique id for filename."""
-    uid = str(uuid1().int)[:11]
-    return uid
-
-
-def sanitize_filepath_for_download_txt(
-        url: str,
-        filename: str,
-        folder: Optional[str] = "books/"
-) -> str:
-    """Return sanitizes filepath for download txt file."""
-    response = requests.get(url=url)
-    response.raise_for_status()
-
-    if folder:
-        sanitized_folder = str(sanitize_filepath(folder))
-        sanitized_filename = str(sanitize_filename(filename))
-        sanitized_filepath = str(
-            os.path.join(sanitized_folder, f"{sanitized_filename}.txt")
-        )
-    else:
-        sanitized_filepath = str(sanitize_filepath(f"{filename}.txt"))
-
-    return sanitized_filepath
+from utils import check_for_redirect, create_dirs, get_unique_id
 
 
 def download_image_file(
@@ -50,6 +17,7 @@ def download_image_file(
     """Download image file from url."""
     response = requests.get(url=url)
     response.raise_for_status()
+    check_for_redirect(response=response)
 
     filename = str(sanitize_filepath(filename))
     with open(filename, "wb") as file:
@@ -64,7 +32,7 @@ def download_txt_file(
     """Download txt file from url."""
     response = requests.get(url=url, params=payload if not None else None)
     response.raise_for_status()
-    _check_for_redirect(response=response)
+    check_for_redirect(response=response)
 
     with open(filename, "w") as file:
         file.write(response.text)
@@ -76,20 +44,11 @@ def download_txt(filename: str, response: Response) -> None:
         file.write(response.text)
 
 
-def _check_for_redirect(response: Response) -> None:
-    """Check for redirect from target."""
-    if response.history:
-        raise HTTPError(
-            "Запрашиваемого ресурса не существует. "
-            "Был произведен редирект на главную страницу."
-        )
-
-
 def get_page(url: str, payload: Optional[dict] = None) -> Response:
     """Get page from url."""
     response = requests.get(url=url, params=payload if not None else None)
     response.raise_for_status()
-    _check_for_redirect(response=response)
+    check_for_redirect(response=response)
     return response
 
 

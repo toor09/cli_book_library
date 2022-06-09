@@ -1,14 +1,18 @@
+from typing import Optional
+
 import requests
 from bs4 import BeautifulSoup
 from requests import Response
 
 from settings import Settings
+from utils import check_for_redirect
 
 
-def get_post_page(url: str) -> Response:
+def get_post_page(url: str, payload: Optional[dict] = None) -> Response:
     """ Get post page from url."""
-    response = requests.get(url=url)
+    response = requests.get(url=url, params=payload if not None else None)
     response.raise_for_status()
+    check_for_redirect(response=response)
     return response
 
 
