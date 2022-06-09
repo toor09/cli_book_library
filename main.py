@@ -1,5 +1,6 @@
 import os
 from typing import Optional
+from urllib.parse import unquote
 
 import requests
 from pathvalidate import sanitize_filename, sanitize_filepath
@@ -44,6 +45,12 @@ def download_txt(filename: str, response: Response) -> None:
         file.write(response.text)
 
 
+def download_image(filename: str, response: Response) -> None:
+    """Download image file."""
+    with open(filename, "wb") as file:
+        file.write(response.content)
+
+
 def get_page(url: str, payload: Optional[dict] = None) -> Response:
     """Get page from url."""
     response = requests.get(url=url, params=payload if not None else None)
@@ -59,7 +66,7 @@ def main() -> None:
     image_path, book_path = (
         os.path.join(
             sanitize_filepath(settings.ROOT_PATH),
-            sanitize_filepath(settings.IMG_LOGO_PATH)
+            sanitize_filepath(settings.IMG_PATH)
         ),
         os.path.join(
             sanitize_filepath(settings.ROOT_PATH),
@@ -78,7 +85,11 @@ def main() -> None:
 
             if book_page.ok:
                 book_attributes = parse_book_page(page=book_page)
-                filename = sanitize_filename(str(book_attributes.get("title")))
+                filename = sanitize_filename(
+                    str(book_attributes.get("title"))
+                )
+                img_link = book_attributes.get("img_link") or ""
+                img_link = unquote(img_link)
                 txt_file = get_page(
                     url=f"{settings.SITE_URL_ROOT}/{uri_txt}",
                     payload={"id": book_id}
@@ -91,8 +102,21 @@ def main() -> None:
                         ),
                         response=txt_file
                     )
-                    print(f"Книга с id={book_id} и названием {filename}"
-                          f" была успешно загружена.")
+                img_file = get_page(
+                    url=f"{settings.SITE_URL_ROOT}/{img_link}"
+                )
+                img_title = img_link.split(os.sep)[-1]
+                if img_file.ok:
+                    download_image(
+                        filename=os.path.join(
+                            image_path,
+                            f"{book_id}.{img_title}"
+                        ),
+                        response=img_file
+                    )
+
+                print(f"Книга с id={book_id} и названием {filename} "
+                      f"была успешно загружена.")
 
         except HTTPError as exc:
             print(f"Книга с id={book_id} {exc}")

@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     BOOK_PAGE: AnyHttpUrl
     IMG_FILENAME: str = "dvmn.svg"
     IMG_LOGO_PATH: Path = Path("img/logo/")
+    IMG_PATH: Path = Path("img")
     IMG_URL: AnyHttpUrl
     ROOT_PATH: Path = Path("downloads/")
     PARSE_BS4_URL_ROOT: AnyHttpUrl
