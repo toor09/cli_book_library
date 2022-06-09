@@ -9,11 +9,10 @@ def parse_book_page(page: Response) -> dict:
     """Parse info from book page."""
     soup = BeautifulSoup(page.text, "lxml")
     book_header = soup.find("h1")
-    book_title, book_author = book_header.text.strip().split("::")
-
+    book_title, book_author = book_header.text.split("::")
     return {
-        "author": book_author,
-        "title": book_title
+        "author": book_author.strip(),
+        "title": book_title.strip()
     }
 
 
