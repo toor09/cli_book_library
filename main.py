@@ -2,6 +2,7 @@ import os
 from typing import Optional
 from urllib.parse import unquote
 
+import click
 import requests
 from pathvalidate import sanitize_filename, sanitize_filepath
 from requests import HTTPError, Response
@@ -59,8 +60,21 @@ def get_page(url: str, payload: Optional[dict] = None) -> Response:
     return response
 
 
-def main() -> None:
-    """ Cli main entrypoint."""
+@click.command()
+@click.option(
+    "-s", "--start-id",
+    default=1,
+    help="From id book."
+)
+@click.option(
+    "-e", "--end-id",
+    default=10,
+    help="To id book."
+)
+def main(start_id: int, end_id: int) -> None:
+    """
+    Download books and covers from tululu.org.
+    """
     settings = Settings()
     uri_txt = settings.SITE_URI_TXT.split("?")[0]
     image_path, book_path = (
@@ -76,7 +90,7 @@ def main() -> None:
 
     list(map(create_dirs, (image_path, book_path)))
 
-    for book_id in range(1, 11):
+    for book_id in range(start_id, end_id+1):
         try:
             book_page = get_page(
                 url=f"{settings.SITE_URL_ROOT}/b{book_id}/",
@@ -115,11 +129,17 @@ def main() -> None:
                         response=img_file
                     )
 
-                print(f"Книга с id={book_id} и названием {filename} "
-                      f"была успешно загружена.")
+                click.echo(
+                    f"Книга с id={book_id} c названием `{filename}` "
+                    f"была успешно загружена.\n"
+                    f"Название: {book_attributes.get('title')}\n"
+                    f"Автор: {book_attributes.get('author')}\n"
+                    f"Жанры: {book_attributes.get('genres')}\n"
+                    f"Отзывы: {book_attributes.get('comments')}\n"
+                )
 
         except HTTPError as exc:
-            print(f"Книга с id={book_id} {exc}")
+            click.echo(f"Книга с id={book_id} {exc}")
             continue
 
 

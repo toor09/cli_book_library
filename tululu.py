@@ -27,8 +27,8 @@ def parse_book_page(page: Response) -> dict:
         "author": book_author.strip(),
         "title": book_title.strip(),
         "img_link": book_cover,
-        "comments": book_comments,
-        "genres": book_genres
+        "genres": book_genres,
+        "comments": book_comments or "Еще нет отзывов."
     }
 
 
