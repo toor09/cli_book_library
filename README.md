@@ -1,4 +1,4 @@
-# CLI скрипт для загрузки книг из онлайн библиотеки
+# Парсер книг с сайта tululu.org
 
 ## Запуск
 
@@ -8,6 +8,17 @@
 ```
 cp .env.example .env
 ```
+<details>
+  <summary>Переменные окружения</summary>
+  <pre>
+    ROOT_PATH=downloads
+    IMG_PATH=images
+    BOOK_PATH=books
+    SITE_URL_ROOT=https://tululu.org
+    SITE_URI_TXT=txt.php
+  </pre>
+</details>
+
 - Установите актуальную версию poetry в `UNIX`-подобных дистрибутивах с помощью команды:
 ```
 curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python3 -
@@ -34,7 +45,14 @@ source .venv/bin/activate
 ```
 - Запустите скрипт командой:
 ```
-python3 main.py
+python3 tululu.py
+```
+- Есть возможность указать значения начального и конечного значения идентификатора книг через следующие опции:
+
+- `-s` или `--start-id` c указанием начального значения идентификатора книги. По умолчанию значение равно 1.
+- `-e` или `--end-id` c указанием конечного значения идентификатора книги. По умолчанию значение равно 10.
+```
+python3 tululu.py -s 50 -e 100
 ```
 - Для запуска линтеров используем команду:
 ```
@@ -42,5 +60,4 @@ flake8 . && mypy . && isort .
 ```
 
 ## Цели проекта
-
-Код написан в учебных целях — это урок в курсе по Python и веб-разработке на сайте [Devman](https://dvmn.org).
+Код написан в образовательных целях на онлайн-курсе для веб-разработчиков [Devman](https://dvmn.org).
