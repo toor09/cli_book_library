@@ -8,7 +8,7 @@ from settings import Settings
 def parse_book_page(page: Response) -> dict:
     """Parse info from book page."""
     soup = BeautifulSoup(page.text, "lxml")
-    book_header = soup.find("h1")
+    book_title, book_author = soup.find("h1").text.split("::")
     book_cover = soup.find(
         "div", class_="bookimage"
     ).find("a").find("img")["src"]
@@ -18,13 +18,17 @@ def parse_book_page(page: Response) -> dict:
         for book_comment in book_comments
     ]
     book_comments = "\n".join(book_comments)
-    book_title, book_author = book_header.text.split("::")
+    book_genres = [
+        book_genre.text.strip()
+        for book_genre in soup.find("span", class_="d_book").find_all("a")
+    ]
 
     return {
         "author": book_author.strip(),
         "title": book_title.strip(),
         "img_link": book_cover,
-        "comments": book_comments
+        "comments": book_comments,
+        "genres": book_genres
     }
 
 
@@ -45,7 +49,8 @@ def main() -> None:
                       f"Автор: {parsed_book.get('author')}\n"
                       f"Ссылка на обложку: {settings.SITE_URL_ROOT}"
                       f"{parsed_book.get('img_link')}\n"
-                      f"Комментарии: {parsed_book.get('comments')}")
+                      f"Комментарии: {parsed_book.get('comments')}\n"
+                      f"Жанры: {parsed_book.get('genres')}")
 
         except HTTPError as exc:
             print(f"Книга с id={book_id} {exc}")
