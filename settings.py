@@ -5,16 +5,9 @@ from pydantic import AnyHttpUrl, BaseSettings
 
 class Settings(BaseSettings):
 
-    BOOK_FILENAME: str = "arthur_clarke-sands_of_mars.txt"
+    ROOT_PATH: Path = Path("downloads")
     BOOK_PATH: Path = Path("books")
-    BOOK_PAGE: AnyHttpUrl
-    IMG_FILENAME: str = "dvmn.svg"
-    IMG_LOGO_PATH: Path = Path("img/logo/")
     IMG_PATH: Path = Path("img")
-    IMG_URL: AnyHttpUrl
-    ROOT_PATH: Path = Path("downloads/")
-    PARSE_BS4_URL_ROOT: AnyHttpUrl
-    PARSE_BS4_URI_BLOG_POST: str
     SITE_URL_ROOT: AnyHttpUrl
     SITE_URI_TXT: str
 

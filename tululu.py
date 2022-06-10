@@ -1,59 +1,97 @@
-from bs4 import BeautifulSoup
-from requests import HTTPError, Response
+import os
+from urllib.parse import unquote
 
-from bs4_tutorial import get_post_page
+import click
+from pathvalidate import sanitize_filename, sanitize_filepath
+from requests import HTTPError
+
+from download import create_dirs, download_image, download_txt
+from parse import get_page, parse_book_page
 from settings import Settings
+from utils import get_unique_id
 
 
-def parse_book_page(page: Response) -> dict:
-    """Parse info from book page."""
-    soup = BeautifulSoup(page.text, "lxml")
-    book_title, book_author = soup.find("h1").text.split("::")
-    book_cover = soup.find(
-        "div", class_="bookimage"
-    ).find("a").find("img")["src"]
-    book_comments = soup.find_all("div", class_="texts")
-    book_comments = [
-        book_comment.find_next("span", class_="black").text.strip()
-        for book_comment in book_comments
-    ]
-    book_comments = "\n".join(book_comments)
-    book_genres = [
-        book_genre.text.strip()
-        for book_genre in soup.find("span", class_="d_book").find_all("a")
-    ]
-
-    return {
-        "author": book_author.strip(),
-        "title": book_title.strip(),
-        "img_link": book_cover,
-        "genres": book_genres,
-        "comments": book_comments or "Еще нет отзывов."
-    }
-
-
-def main() -> None:
-    """Main entry."""
+@click.command()
+@click.option(
+    "-s", "--start-id",
+    default=1,
+    help="From id book."
+)
+@click.option(
+    "-e", "--end-id",
+    default=10,
+    help="To id book."
+)
+def main(start_id: int, end_id: int) -> None:
+    """
+    Download books and covers from tululu.org.
+    """
     settings = Settings()
+    image_path, book_path = (
+        os.path.join(
+            sanitize_filepath(settings.ROOT_PATH),
+            sanitize_filepath(settings.IMG_PATH)
+        ),
+        os.path.join(
+            sanitize_filepath(settings.ROOT_PATH),
+            sanitize_filepath(settings.BOOK_PATH)
+        )
+    )
 
-    for book_id in range(1, 11):
+    list(map(create_dirs, (image_path, book_path)))
+
+    for book_id in range(start_id, end_id+1):
         try:
-            book_page = get_post_page(
+            book_page = get_page(
                 url=f"{settings.SITE_URL_ROOT}/b{book_id}/",
-                payload={"id": book_id})
+                payload={"id": book_id}
+            )
 
             if book_page.ok:
-                parsed_book = parse_book_page(page=book_page)
+                book_attrs = parse_book_page(page=book_page)
+                filename = sanitize_filename(
+                    str(book_attrs.get("title"))
+                )
+                img_link = unquote(book_attrs.get("img_link") or "")
 
-                print(f"Заголовок: {parsed_book.get('title')}\n"
-                      f"Автор: {parsed_book.get('author')}\n"
-                      f"Ссылка на обложку: {settings.SITE_URL_ROOT}"
-                      f"{parsed_book.get('img_link')}\n"
-                      f"Комментарии: {parsed_book.get('comments')}\n"
-                      f"Жанры: {parsed_book.get('genres')}")
+                img_title = img_link.split(os.sep)[-1]
+
+                img_file = get_page(
+                    url=f"{settings.SITE_URL_ROOT}/{img_link}"
+                )
+                if img_file.ok:
+                    download_image(
+                        filename=os.path.join(
+                            image_path,
+                            f"{book_id}.{img_title}"
+                        ),
+                        response=img_file
+                    )
+
+                txt_file = get_page(
+                    url=f"{settings.SITE_URL_ROOT}/{settings.SITE_URI_TXT}",
+                    payload={"id": book_id}
+                )
+                if txt_file.ok:
+                    download_txt(
+                        filename=os.path.join(
+                            book_path,
+                            f"{book_id}. {filename}-{get_unique_id()}.txt"
+                        ),
+                        response=txt_file
+                    )
+
+                click.echo(
+                    f"Книга с id={book_id} c названием `{filename}` "
+                    f"была успешно загружена.\n"
+                    f"Название: `{book_attrs.get('title')}`\n"
+                    f"Автор: {book_attrs.get('author')}\n"
+                    f"Жанры: {book_attrs.get('genres')}\n"
+                    f"Отзывы: {book_attrs.get('comments')}\n"
+                )
 
         except HTTPError as exc:
-            print(f"Книга с id={book_id} {exc}")
+            click.echo(f"Книга с id={book_id} {exc}")
             continue
 
 
