@@ -1,6 +1,3 @@
-from typing import Optional
-
-import requests
 from bs4 import BeautifulSoup
 from requests import HTTPError, Response
 
@@ -12,14 +9,6 @@ def _check_for_redirect(response: Response) -> None:
             "Запрашиваемого ресурса не существует. "
             "Загрузка невозможна :(."
         )
-
-
-def get_page(url: str, payload: Optional[dict] = None) -> Response:
-    """Get page from url."""
-    response = requests.get(url=url, params=payload if payload else None)
-    response.raise_for_status()
-    _check_for_redirect(response=response)
-    return response
 
 
 def parse_book_page(page: Response) -> dict:

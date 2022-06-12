@@ -2,11 +2,12 @@ import os
 from urllib.parse import unquote
 
 import click
+import requests
 from pathvalidate import sanitize_filename, sanitize_filepath
 from requests import HTTPError
 
 from download import create_dirs, download_image, download_txt
-from parse import get_page, parse_book_page
+from parse import _check_for_redirect, parse_book_page
 from settings import Settings
 from utils import get_unique_id
 
@@ -27,26 +28,25 @@ def main(start_id: int, end_id: int) -> None:
     Download books and covers from tululu.org.
     """
     settings = Settings()
-    image_path, book_path = (
-        os.path.join(
+    image_path = os.path.join(
             sanitize_filepath(settings.ROOT_PATH),
             sanitize_filepath(settings.IMG_PATH)
-        ),
-        os.path.join(
+    )
+    book_path = os.path.join(
             sanitize_filepath(settings.ROOT_PATH),
             sanitize_filepath(settings.BOOK_PATH)
-        )
     )
 
     list(map(create_dirs, (image_path, book_path)))
 
     for book_id in range(start_id, end_id+1):
         try:
-            book_page = get_page(
+            book_page = requests.get(
                 url=f"{settings.SITE_URL_ROOT}/b{book_id}/",
-                payload={"id": book_id}
+                params={"id": book_id}
             )
-
+            book_page.raise_for_status()
+            _check_for_redirect(response=book_page)
             if book_page.ok:
                 book_attrs = parse_book_page(page=book_page)
                 filename = sanitize_filename(
@@ -56,9 +56,11 @@ def main(start_id: int, end_id: int) -> None:
 
                 img_title = img_link.split(os.sep)[-1]
 
-                img_file = get_page(
+                img_file = requests.get(
                     url=f"{settings.SITE_URL_ROOT}/{img_link}"
                 )
+                img_file.raise_for_status()
+                _check_for_redirect(response=img_file)
                 if img_file.ok:
                     download_image(
                         filename=os.path.join(
@@ -68,10 +70,12 @@ def main(start_id: int, end_id: int) -> None:
                         response=img_file
                     )
 
-                txt_file = get_page(
+                txt_file = requests.get(
                     url=f"{settings.SITE_URL_ROOT}/{settings.SITE_URI_TXT}",
-                    payload={"id": book_id}
+                    params={"id": book_id}
                 )
+                txt_file.raise_for_status()
+                _check_for_redirect(response=txt_file)
                 if txt_file.ok:
                     download_txt(
                         filename=os.path.join(
