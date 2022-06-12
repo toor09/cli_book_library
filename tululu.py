@@ -50,7 +50,7 @@ def main(start_id: int, end_id: int) -> None:
             if book_page.ok:
                 book_attrs = parse_book_page(page=book_page)
                 filename = sanitize_filename(
-                    str(book_attrs.get("title"))
+                    f"{book_attrs.get('title')}"
                 )
                 img_link = unquote(book_attrs.get("img_link") or "")
 
