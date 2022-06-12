@@ -1,4 +1,5 @@
 import os
+import textwrap
 from urllib.parse import unquote
 
 import click
@@ -91,15 +92,17 @@ def main(start_id: int, end_id: int) -> None:
                     click.echo(f"Содержимое книги с id={book_id} не была "
                                f"скачано по причине: {txt_file.reason}"
                                )
-
-                click.echo(
-                    f"Книга с id={book_id} c названием `{filename}` "
-                    f"была успешно загружена.\n"
-                    f"Название: `{book_attrs.get('title')}`\n"
-                    f"Автор: {book_attrs.get('author')}\n"
-                    f"Жанры: {book_attrs.get('genres')}\n"
-                    f"Отзывы: {book_attrs.get('comments')}\n"
+                message = f"""Книга с id={book_id} c названием `{filename}`
+                        была успешно загружена.
+                        Название: `{book_attrs.get('title')}`
+                        Автор: {book_attrs.get('author')}
+                        Жанры: {book_attrs.get('genres')}
+                        Отзывы: {book_attrs.get('comments')}
+                """
+                message = "\n".join(
+                    [textwrap.dedent(line) for line in message.split('\n')]
                 )
+                click.echo(message)
 
             else:
                 click.echo(f"Страница книги с id={book_id} не доступна по"
