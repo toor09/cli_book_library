@@ -9,13 +9,13 @@ def create_dirs(path: str) -> None:
         os.makedirs(path)
 
 
-def download_txt(filename: str, response: Response) -> None:
-    """Download txt file."""
+def create_txt(filename: str, response: Response) -> None:
+    """Create txt file."""
     with open(filename, "w") as file:
         file.write(response.text)
 
 
-def download_image(filename: str, response: Response) -> None:
-    """Download image file."""
+def create_image(filename: str, response: Response) -> None:
+    """Create image file."""
     with open(filename, "wb") as file:
         file.write(response.content)

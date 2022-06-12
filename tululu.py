@@ -6,7 +6,7 @@ import requests
 from pathvalidate import sanitize_filename, sanitize_filepath
 from requests import HTTPError
 
-from download import create_dirs, download_image, download_txt
+from download import create_dirs, create_image, create_txt
 from parse import _check_for_redirect, parse_book_page
 from settings import Settings
 from utils import get_unique_id
@@ -66,7 +66,7 @@ def main(start_id: int, end_id: int) -> None:
                     img_filename = os.path.join(
                         image_path, f"{book_id}.{img_title}"
                     )
-                    download_image(filename=img_filename, response=img_file)
+                    create_image(filename=img_filename, response=img_file)
 
                 else:
                     click.echo(f"Обложка книги с id={book_id} не была скачана"
@@ -85,7 +85,7 @@ def main(start_id: int, end_id: int) -> None:
                         book_path,
                         f"{book_id}.{filename}-{get_unique_id()}.txt"
                     )
-                    download_txt(filename=txt_filename, response=txt_file)
+                    create_txt(filename=txt_filename, response=txt_file)
 
                 else:
                     click.echo(f"Содержимое книги с id={book_id} не была "
