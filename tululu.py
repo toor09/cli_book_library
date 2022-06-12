@@ -27,15 +27,13 @@ def main(start_id: int, end_id: int) -> None:
     Download books and covers from tululu.org.
     """
     settings = Settings()
-    image_path, book_path = (
-        os.path.join(
+    image_path = os.path.join(
             sanitize_filepath(settings.ROOT_PATH),
             sanitize_filepath(settings.IMG_PATH)
-        ),
-        os.path.join(
+    )
+    book_path = os.path.join(
             sanitize_filepath(settings.ROOT_PATH),
             sanitize_filepath(settings.BOOK_PATH)
-        )
     )
 
     list(map(create_dirs, (image_path, book_path)))
