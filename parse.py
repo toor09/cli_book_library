@@ -7,7 +7,7 @@ def _check_for_redirect(response: Response) -> None:
     if response.history:
         raise HTTPError(
             "Запрашиваемого ресурса не существует. "
-            "Загрузка невозможна :(."
+            "Загрузка невозможна :(.\n"
         )
 
 

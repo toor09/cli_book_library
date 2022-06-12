@@ -29,17 +29,17 @@ def main(start_id: int, end_id: int) -> None:
     """
     settings = Settings()
     image_path = os.path.join(
-            sanitize_filepath(settings.ROOT_PATH),
-            sanitize_filepath(settings.IMG_PATH)
+        sanitize_filepath(settings.ROOT_PATH),
+        sanitize_filepath(settings.IMG_PATH)
     )
     book_path = os.path.join(
-            sanitize_filepath(settings.ROOT_PATH),
-            sanitize_filepath(settings.BOOK_PATH)
+        sanitize_filepath(settings.ROOT_PATH),
+        sanitize_filepath(settings.BOOK_PATH)
     )
 
     list(map(create_dirs, (image_path, book_path)))
 
-    for book_id in range(start_id, end_id+1):
+    for book_id in range(start_id, end_id + 1):
         try:
             book_page = requests.get(
                 url=f"{settings.SITE_URL_ROOT}/b{book_id}/",
@@ -61,6 +61,7 @@ def main(start_id: int, end_id: int) -> None:
                 )
                 img_file.raise_for_status()
                 _check_for_redirect(response=img_file)
+
                 if img_file.ok:
                     download_image(
                         filename=os.path.join(
@@ -69,6 +70,10 @@ def main(start_id: int, end_id: int) -> None:
                         ),
                         response=img_file
                     )
+                else:
+                    click.echo(f"Обложка книги с id={book_id} не была скачана"
+                               f" по причине: {img_file.reason}"
+                               )
 
                 txt_file = requests.get(
                     url=f"{settings.SITE_URL_ROOT}/{settings.SITE_URI_TXT}",
@@ -76,6 +81,7 @@ def main(start_id: int, end_id: int) -> None:
                 )
                 txt_file.raise_for_status()
                 _check_for_redirect(response=txt_file)
+
                 if txt_file.ok:
                     download_txt(
                         filename=os.path.join(
@@ -84,6 +90,10 @@ def main(start_id: int, end_id: int) -> None:
                         ),
                         response=txt_file
                     )
+                else:
+                    click.echo(f"Содержимое книги с id={book_id} не была "
+                               f"скачано по причине: {txt_file.reason}"
+                               )
 
                 click.echo(
                     f"Книга с id={book_id} c названием `{filename}` "
@@ -93,6 +103,11 @@ def main(start_id: int, end_id: int) -> None:
                     f"Жанры: {book_attrs.get('genres')}\n"
                     f"Отзывы: {book_attrs.get('comments')}\n"
                 )
+
+            else:
+                click.echo(f"Страница книги с id={book_id} не доступна по"
+                           f" причине: {book_page.reason}"
+                           )
 
         except HTTPError as exc:
             click.echo(f"Книга с id={book_id} {exc}")
