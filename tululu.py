@@ -52,8 +52,8 @@ def main(start_id: int, end_id: int) -> None:
                 filename = sanitize_filename(
                     f"{book_attrs.get('title')}"
                 )
-                img_link = unquote(book_attrs.get("img_link") or "")
 
+                img_link = unquote(book_attrs.get("img_link") or "")
                 img_title = img_link.split(os.sep)[-1]
 
                 img_file = requests.get(
@@ -63,13 +63,11 @@ def main(start_id: int, end_id: int) -> None:
                 _check_for_redirect(response=img_file)
 
                 if img_file.ok:
-                    download_image(
-                        filename=os.path.join(
-                            image_path,
-                            f"{book_id}.{img_title}"
-                        ),
-                        response=img_file
+                    img_filename = os.path.join(
+                        image_path, f"{book_id}.{img_title}"
                     )
+                    download_image(filename=img_filename, response=img_file)
+
                 else:
                     click.echo(f"Обложка книги с id={book_id} не была скачана"
                                f" по причине: {img_file.reason}"
@@ -83,13 +81,12 @@ def main(start_id: int, end_id: int) -> None:
                 _check_for_redirect(response=txt_file)
 
                 if txt_file.ok:
-                    download_txt(
-                        filename=os.path.join(
-                            book_path,
-                            f"{book_id}. {filename}-{get_unique_id()}.txt"
-                        ),
-                        response=txt_file
+                    txt_filename = os.path.join(
+                        book_path,
+                        f"{book_id}.{filename}-{get_unique_id()}.txt"
                     )
+                    download_txt(filename=txt_filename, response=txt_file)
+
                 else:
                     click.echo(f"Содержимое книги с id={book_id} не была "
                                f"скачано по причине: {txt_file.reason}"
