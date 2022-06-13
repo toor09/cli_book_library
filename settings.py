@@ -1,7 +1,6 @@
 from pathlib import Path
-from typing import List
 
-from pydantic import AnyHttpUrl, BaseSettings, validator
+from pydantic import AnyHttpUrl, BaseSettings
 
 
 class Settings(BaseSettings):
