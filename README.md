@@ -16,6 +16,10 @@ cp .env.example .env
     BOOK_PATH=books
     SITE_URL_ROOT=https://tululu.org
     SITE_URI_TXT=txt.php
+    TIMEOUT=10
+    RETRY_COUNT=5
+    STATUS_FORCE_LIST=429,500,502,503,504
+    ALLOWED_METHODS=HEAD,GET,OPTIONS
   </pre>
 </details>
 
@@ -25,7 +29,7 @@ curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poet
 ```
 или в `Windows Powershell`:
 ```
-Invoke-WebRequest -Uri https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py -UseBasicParsing).Content | python -
+(Invoke-WebRequest -Uri https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py -UseBasicParsing).Content | python -
 ```
 - Добавьте к переменной окружения `$PATH` команду poetry:
 ```

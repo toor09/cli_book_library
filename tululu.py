@@ -1,16 +1,18 @@
 import os
 import textwrap
 from urllib.parse import unquote
+from uuid import uuid1
 
 import click
 import requests
 from pathvalidate import sanitize_filename, sanitize_filepath
-from requests import HTTPError
+from requests import ConnectionError, HTTPError
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.util.retry import Retry
 
 from download import create_dirs, create_image, create_txt
 from parse import _check_for_redirect, parse_book_page
 from settings import Settings
-from utils import get_unique_id
 
 
 @click.command()
@@ -38,13 +40,25 @@ def main(start_id: int, end_id: int) -> None:
         sanitize_filepath(settings.BOOK_PATH)
     )
 
+    retry_strategy = Retry(
+        total=settings.RETRY_COUNT,
+        status_forcelist=settings.STATUS_FORCE_LIST,
+        allowed_methods=settings.ALLOWED_METHODS
+    )
+    adapter = HTTPAdapter(max_retries=retry_strategy)
+
+    session = requests.Session()
+    session.mount("https://", adapter)
+    session.mount("http://", adapter)
+
     list(map(create_dirs, (image_path, book_path)))
 
     for book_id in range(start_id, end_id + 1):
         try:
-            book_page = requests.get(
+            book_page = session.get(
                 url=f"{settings.SITE_URL_ROOT}/b{book_id}/",
-                params={"id": book_id}
+                params={"id": book_id},
+                timeout=settings.TIMEOUT
             )
             book_page.raise_for_status()
             _check_for_redirect(response=book_page)
@@ -57,7 +71,7 @@ def main(start_id: int, end_id: int) -> None:
                 img_link = unquote(book_attrs.get("img_link") or "")
                 img_title = img_link.split(os.sep)[-1]
 
-                img_file = requests.get(
+                img_file = session.get(
                     url=f"{settings.SITE_URL_ROOT}/{img_link}"
                 )
                 img_file.raise_for_status()
@@ -74,7 +88,7 @@ def main(start_id: int, end_id: int) -> None:
                                f" по причине: {img_file.reason}"
                                )
 
-                txt_file = requests.get(
+                txt_file = session.get(
                     url=f"{settings.SITE_URL_ROOT}/{settings.SITE_URI_TXT}",
                     params={"id": book_id}
                 )
@@ -84,7 +98,7 @@ def main(start_id: int, end_id: int) -> None:
                 if txt_file.ok:
                     txt_filename = os.path.join(
                         book_path,
-                        f"{book_id}.{filename}-{get_unique_id()}.txt"
+                        f"{book_id}.{filename}-{str(uuid1().int)[:11]}.txt"
                     )
                     create_txt(filename=txt_filename, response=txt_file)
 
@@ -111,6 +125,10 @@ def main(start_id: int, end_id: int) -> None:
 
         except HTTPError as exc:
             click.echo(f"Книга с id={book_id} {exc}")
+            continue
+
+        except ConnectionError as exc:
+            click.echo(f"Ошибка подключения :( {exc}")
             continue
 
 
