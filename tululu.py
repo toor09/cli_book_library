@@ -10,13 +10,8 @@ from requests import ConnectionError, HTTPError
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
 
-from download import create_dirs, create_image, create_txt
-from parse import (
-    check_for_redirect,
-    get_book_content,
-    get_book_cover,
-    parse_book_page
-)
+from download import create_dirs, download_book_cover, download_book_txt
+from parse import check_for_redirect, parse_book_page
 from settings import Settings
 
 
@@ -73,27 +68,27 @@ def main(start_id: int, end_id: int) -> None:
                 book_attrs.get("title")  # type: ignore
             )
 
-            img_link = unquote(book_attrs.get("img_link") or "")
-            img_title = img_link.split(os.sep)[-1]
-            img_content = get_book_cover(
+            book_cover_link = unquote(book_attrs.get("img_link") or "")
+            book_cover_title = book_cover_link.split(os.sep)[-1]
+            book_cover_filename = os.path.join(
+                image_path, f"{book_id}.{book_cover_title}"
+            )
+            download_book_cover(
                 session=session,
-                url=urljoin(settings.SITE_URL_ROOT, img_link)
+                url=urljoin(settings.SITE_URL_ROOT, book_cover_link),
+                filename=book_cover_filename
             )
-            img_filename = os.path.join(
-                image_path, f"{book_id}.{img_title}"
-            )
-            create_image(filename=img_filename, response=img_content)
 
-            txt_content = get_book_content(
-                session=session,
-                url=urljoin(settings.SITE_URL_ROOT, settings.SITE_URI_TXT),
-                params={"id": book_id}
-            )
-            txt_filename = os.path.join(
+            book_filename = os.path.join(
                 book_path,
                 f"{book_id}.{filename}-{str(uuid1().int)[:11]}.txt"
             )
-            create_txt(filename=txt_filename, response=txt_content)
+            download_book_txt(
+                session=session,
+                url=urljoin(settings.SITE_URL_ROOT, settings.SITE_URI_TXT),
+                filename=book_filename,
+                params={"id": book_id}
+            )
 
             message = f"""Книга с id={book_id} c названием `{filename}`
                     была успешно загружена.

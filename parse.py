@@ -1,6 +1,3 @@
-from typing import Optional
-
-import requests
 from bs4 import BeautifulSoup
 from requests import HTTPError, Response
 
@@ -12,26 +9,6 @@ def check_for_redirect(response: Response) -> None:
             "Запрашиваемого ресурса не существует. "
             "Загрузка невозможна :(.\n"
         )
-
-
-def get_book_cover(session: requests.Session, url: str) -> Response:
-    """ Get book cover from current page."""
-    img_content = session.get(url=url)
-    img_content.raise_for_status()
-    check_for_redirect(response=img_content)
-    return img_content
-
-
-def get_book_content(
-        session: requests.Session,
-        url: str,
-        params: Optional[dict] = None
-) -> Response:
-    """ Get book content from current page."""
-    txt_content = session.get(url=url, params=params if params else None)
-    txt_content.raise_for_status()
-    check_for_redirect(response=txt_content)
-    return txt_content
 
 
 def parse_book_page(page: Response) -> dict:
