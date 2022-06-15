@@ -1,5 +1,6 @@
 import os
 import textwrap
+import time
 from urllib.parse import unquote, urljoin
 from uuid import uuid1
 
@@ -104,11 +105,10 @@ def main(start_id: int, end_id: int) -> None:
 
         except HTTPError as exc:
             click.echo(f"Книга с id={book_id} {exc}")
-            continue
 
         except ConnectionError as exc:
             click.echo(f"Ошибка подключения :( {exc}")
-            continue
+            time.sleep(settings.TIMEOUT)
 
 
 if __name__ == "__main__":
