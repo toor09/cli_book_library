@@ -16,6 +16,17 @@ from parse import check_for_redirect, parse_book_page
 from settings import Settings
 
 
+def validate_options(start_id: int, end_id: int) -> None:
+    if start_id > end_id:
+        raise click.ClickException(
+            "Option --end-id must be greater than option --start-id"
+        )
+    if start_id <= 0:
+        raise click.ClickException(
+            "Option --start-id must be greater than 0"
+        )
+
+
 @click.command()
 @click.option(
     "-s", "--start-id",
@@ -31,6 +42,7 @@ def main(start_id: int, end_id: int) -> None:
     """
     Download books and covers from tululu.org.
     """
+    validate_options(start_id, end_id)
     settings = Settings()
     image_path = os.path.join(
         sanitize_filepath(settings.ROOT_PATH),
