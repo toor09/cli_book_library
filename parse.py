@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 from requests import HTTPError, Response
 
 
-def _check_for_redirect(response: Response) -> None:
+def check_for_redirect(response: Response) -> None:
     """Check for redirect from target."""
     if response.history:
         raise HTTPError(
@@ -18,7 +18,7 @@ def get_book_cover(session: requests.Session, url: str) -> Response:
     """ Get book cover from current page."""
     img_content = session.get(url=url)
     img_content.raise_for_status()
-    _check_for_redirect(response=img_content)
+    check_for_redirect(response=img_content)
     return img_content
 
 
@@ -30,7 +30,7 @@ def get_book_content(
     """ Get book content from current page."""
     txt_content = session.get(url=url, params=params if params else None)
     txt_content.raise_for_status()
-    _check_for_redirect(response=txt_content)
+    check_for_redirect(response=txt_content)
     return txt_content
 
 

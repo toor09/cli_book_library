@@ -12,7 +12,7 @@ from requests.packages.urllib3.util.retry import Retry
 
 from download import create_dirs, create_image, create_txt
 from parse import (
-    _check_for_redirect,
+    check_for_redirect,
     get_book_content,
     get_book_cover,
     parse_book_page
@@ -66,7 +66,7 @@ def main(start_id: int, end_id: int) -> None:
                 timeout=settings.TIMEOUT
             )
             book_page.raise_for_status()
-            _check_for_redirect(response=book_page)
+            check_for_redirect(response=book_page)
 
             book_attrs = parse_book_page(page=book_page)
             filename = sanitize_filename(
