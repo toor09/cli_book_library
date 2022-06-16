@@ -1,5 +1,6 @@
+import json
 import os
-from typing import Optional
+from typing import List, Optional
 
 from requests import Session
 
@@ -35,3 +36,32 @@ def download_book_txt(
 
     with open(file=filename, mode="w") as file:
         file.write(book_txt.text)
+
+
+def transform_book_description(
+        book_attrs: List[dict],
+) -> List[dict]:
+    """ Transform book attributes for required view."""
+    books_description = []
+    for book in book_attrs:
+        books_description.append(
+            {
+                "title": book.get("title"),
+                "author": book.get("author"),
+                "img_src": book.get("img_src"),
+                "book_path": book.get("book_path"),
+                "comments": book.get("comments").split("\n"),  # type: ignore
+                "genres": book.get("genres")
+            }
+        )
+
+    return books_description
+
+
+def create_description_file(
+        filename: str,
+        books_description: List[dict]
+) -> None:
+    """Create description file for local library."""
+    with open(file=filename, mode="a") as file:
+        json.dump(books_description, file, ensure_ascii=False, indent=2)

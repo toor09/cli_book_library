@@ -1,3 +1,5 @@
+from typing import List
+
 from bs4 import BeautifulSoup
 from requests import HTTPError, Response
 
@@ -36,3 +38,15 @@ def parse_book_page(page: Response) -> dict:
         "genres": book_genres,
         "comments": book_comments or "Еще нет отзывов"
     }
+
+
+def parse_book_links_for_download(page: Response) -> List[str]:
+    """Parse book links from book cards for downloading."""
+    soup = BeautifulSoup(page.text, "lxml")
+    book_categories = soup.find(
+        id="content"
+    ).find_all("table", class_="d_book")
+    book_links = [
+        book.find_next("a")["href"] for book in book_categories
+    ]
+    return book_links

@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     IMG_PATH: Path = Path("img")
     SITE_URL_ROOT: AnyHttpUrl
     SITE_URI_TXT: str
+    DESCRIPTION_FILE: str
     TIMEOUT: int = 10
     RETRY_COUNT: int = 5
     STATUS_FORCE_LIST: str = "429,500,502,503,504"
