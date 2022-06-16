@@ -43,10 +43,8 @@ def parse_book_page(page: Response) -> dict:
 def parse_book_links_for_download(page: Response) -> List[str]:
     """Parse book links from book cards for downloading."""
     soup = BeautifulSoup(page.text, "lxml")
-    book_categories = soup.find(
-        id="content"
-    ).find_all("table", class_="d_book")
+    book_categories = soup.select("#content table.d_book")
     book_links = [
-        book.find_next("a")["href"] for book in book_categories
+        book.select_one("a")["href"] for book in book_categories
     ]
     return book_links
