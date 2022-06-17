@@ -63,5 +63,5 @@ def create_description_file(
         books_description: List[dict]
 ) -> None:
     """Create description file for local library."""
-    with open(file=filename, mode="a") as file:
+    with open(file=filename, mode="w") as file:
         json.dump(books_description, file, ensure_ascii=False, indent=2)
