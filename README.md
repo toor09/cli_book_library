@@ -73,7 +73,7 @@ python3 tululu_category.py
 - `-J` или `--json-path` с указанием пути для генерации `json` файла. По умолчанию значение указывает на текущую директорию. 
 - `-D` или `--dest-folder` с указание пути, куда будет загружен весь контент, включая книги, обложки и `json` файл с описанием. По умолчанию значение берется из переменной окружения `ROOT_PATH`.
 ```
-python3 tululu.py -s 1 -e 5 -I true -T false -J folder/some -D /home/user/books-test
+python3 tululu_category.py -s 1 -e 5 -I true -T false -J folder/some -D /home/user/books-test
 ```
 - Для запуска линтеров используем команду:
 ```
