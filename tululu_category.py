@@ -207,31 +207,27 @@ def main(
         book_description["comments"] = book_description["comments"].split("\n")
 
     if not json_path:
-        create_description_file(
-            filename=os.path.join(
-                sanitize_filepath(settings.ROOT_PATH),
-                sanitize_filepath(settings.DESCRIPTION_FILE)
-            ),
-            books_description=books_description
+        filename = os.path.join(
+            sanitize_filepath(settings.ROOT_PATH),
+            sanitize_filepath(settings.DESCRIPTION_FILE)
         )
 
     elif dest_folder:
-        create_description_file(
-            filename=os.path.join(
-                books_desc_path,
-                sanitize_filepath(settings.DESCRIPTION_FILE)
-            ),
-            books_description=books_description
+        filename = os.path.join(
+            books_desc_path,
+            sanitize_filepath(settings.DESCRIPTION_FILE)
         )
     else:
-        create_description_file(
-            filename=os.path.join(
-                books_desc_path,
-                sanitize_filepath(json_path, platform="auto"),
-                sanitize_filepath(settings.DESCRIPTION_FILE)
-            ),
-            books_description=books_description
+        filename = os.path.join(
+            books_desc_path,
+            sanitize_filepath(json_path, platform="auto"),
+            sanitize_filepath(settings.DESCRIPTION_FILE)
         )
+
+    create_description_file(
+        filename=filename,
+        books_description=books_description
+    )
 
 
 if __name__ == "__main__":
