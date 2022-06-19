@@ -38,26 +38,6 @@ def download_book_txt(
         file.write(book_txt.text)
 
 
-def transform_book_description(
-        book_attrs: List[dict],
-) -> List[dict]:
-    """ Transform book attributes for required view."""
-    books_description = []
-    for book in book_attrs:
-        books_description.append(
-            {
-                "title": book.get("title"),
-                "author": book.get("author"),
-                "img_src": book.get("img_src"),
-                "book_path": book.get("book_path"),
-                "comments": book.get("comments").split("\n"),  # type: ignore
-                "genres": book.get("genres")
-            }
-        )
-
-    return books_description
-
-
 def create_description_file(
         filename: str,
         books_description: List[dict]

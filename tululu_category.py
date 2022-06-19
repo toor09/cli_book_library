@@ -16,8 +16,7 @@ from download import (
     create_description_file,
     create_dirs,
     download_book_cover,
-    download_book_txt,
-    transform_book_description
+    download_book_txt
 )
 from parse import (
     check_for_redirect,
@@ -119,7 +118,6 @@ def main(
     session.mount("http://", adapter)
 
     books_description = []
-    books = []
     for page in range(start_page, end_page + 1):
         try:
             url = urljoin(
@@ -184,10 +182,6 @@ def main(
                     }
                 )
                 books_description.append(book_attrs)
-                books = transform_book_description(
-                    book_attrs=books_description
-                )
-
                 message = f"""Книга с id={book_id}
                         c названием `{filename}`
                         была успешно загружена.
@@ -208,13 +202,17 @@ def main(
             click.echo(f"Ошибка подключения :( {exc}")
             time.sleep(settings.TIMEOUT)
 
+    for book_description in books_description:
+        del book_description["img_link"]
+        book_description["comments"] = book_description["comments"].split("\n")
+
     if not json_path:
         create_description_file(
             filename=os.path.join(
                 sanitize_filepath(settings.ROOT_PATH),
                 sanitize_filepath(settings.DESCRIPTION_FILE)
             ),
-            books_description=books
+            books_description=books_description
         )
 
     elif dest_folder:
@@ -223,7 +221,7 @@ def main(
                 books_desc_path,
                 sanitize_filepath(settings.DESCRIPTION_FILE)
             ),
-            books_description=books
+            books_description=books_description
         )
     else:
         create_description_file(
@@ -232,7 +230,7 @@ def main(
                 sanitize_filepath(json_path, platform="auto"),
                 sanitize_filepath(settings.DESCRIPTION_FILE)
             ),
-            books_description=books
+            books_description=books_description
         )
 
 
