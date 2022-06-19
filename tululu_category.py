@@ -150,9 +150,11 @@ def main(
                 if not skip_imgs:
                     book_cover_link = unquote(book_attrs.get("img_link") or "")
                     book_cover_title = book_cover_link.split(os.sep)[-1]
+                    book_cover_prefix = urlsplit(book_link).path[2:-1]
+                    book_cover_name = f"{book_cover_prefix}.{book_cover_title}"
                     book_cover_filename = os.path.join(
                         image_path,
-                        f"{urlsplit(book_link).path[2:-1]}.{book_cover_title}"
+                        book_cover_name
                     )
                     download_book_cover(
                         session=session,
@@ -162,11 +164,9 @@ def main(
 
                 book_filename = ""
                 if not skip_txt:
-                    book_filename = os.path.join(
-                        book_path,
-                        f"{book_id}.{filename}"
-                        f"-{str(uuid1().int)[:11]}.txt"
-                    )
+                    random_key = str(uuid1().int)[:11]
+                    book_name = f"{book_id}.{filename}-{random_key}.txt"
+                    book_filename = os.path.join(book_path, book_name)
                     download_book_txt(
                         session=session,
                         url=urljoin(
