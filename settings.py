@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     RETRY_COUNT: int = 5
     STATUS_FORCE_LIST: str = "429,500,502,503,504"
     ALLOWED_METHODS: str = "HEAD,GET,OPTIONS"
+    AUTO_RELOAD: bool = False
 
     @validator("STATUS_FORCE_LIST")
     def status_force_list(cls, v: str) -> List[int]:

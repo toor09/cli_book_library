@@ -19,6 +19,7 @@ flake8 = "^4.0.1"
 mypy = "^0.961"
 isort = "^5.10.1"
 types-requests = "^2.27.30"
+livereload = "^2.6.3"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

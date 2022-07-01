@@ -1,11 +1,28 @@
 import json
 import os
+from datetime import datetime as dt
 from typing import Dict, List
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from pathvalidate import sanitize_filepath
 
 from settings import Settings
+
+
+def livereload(card_books: List[Dict]) -> None:
+    """Auto reloading after edit template.html."""
+
+    from livereload import Server
+
+    def rebuild() -> None:
+        render_page(card_books=card_books)
+        print(f"{dt.now()} Page rebuilt")
+
+    rebuild()
+
+    server = Server()
+    server.watch('template.html', rebuild)
+    server.serve(root='.')
 
 
 def extract_json_data(file_path: str) -> List[Dict]:
@@ -47,6 +64,9 @@ def main() -> None:
     )
     card_books = extract_json_data(file)
     render_page(card_books)
+
+    if settings.AUTO_RELOAD:
+        livereload(card_books=card_books)
 
 
 if __name__ == "__main__":
