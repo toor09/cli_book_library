@@ -14,6 +14,7 @@ from settings import Settings
 
 def livereload(
         card_book_chunks: List[List[Dict]],
+        total_pages: int,
         library_file_path: Union[str, Path]
 ) -> None:
     """Auto reloading after edit template.html."""
@@ -25,6 +26,7 @@ def livereload(
             render_page(
                 card_books=card_book_chunk,
                 number_page=number_page + 1,
+                total_pages=total_pages,
                 file_path=library_file_path
             )
         print(f"{dt.now()} Pages are rebuilt...")
@@ -50,6 +52,7 @@ def extract_json_data(file_path: str) -> List[Dict]:
 def render_page(
         card_books: List[Dict],
         number_page: int,
+        total_pages: int,
         file_path: Union[str, Path]
 ) -> None:
     """Render page with template variables."""
@@ -62,7 +65,9 @@ def render_page(
     template = env.get_template("template.html")
 
     rendered_page = template.render(
-        card_books=card_books
+        card_books=card_books,
+        current_page=number_page,
+        total_pages=total_pages
     )
     path_file = f"{file_path}/index{number_page}.html"
     with open(path_file, mode="w", encoding="utf8") as file:
@@ -82,17 +87,20 @@ def main() -> None:
 
     card_books = extract_json_data(file)
     card_book_chunks = list(chunked(card_books, settings.PAGE_SIZE))
+    total_pages = len(card_book_chunks)
 
     for number_page, card_book_chunk in enumerate(card_book_chunks):
         render_page(
             card_books=card_book_chunk,
             number_page=number_page + 1,
+            total_pages=total_pages,
             file_path=library_file_path
         )
 
     if settings.AUTO_RELOAD:
         livereload(
             card_book_chunks=card_book_chunks,
+            total_pages=total_pages,
             library_file_path=library_file_path
         )
 
