@@ -1,28 +1,39 @@
 import json
 import os
 from datetime import datetime as dt
-from typing import Dict, List
+from pathlib import Path
+from typing import Dict, List, Union
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
+from more_itertools import chunked
 from pathvalidate import sanitize_filepath
 
+from download import create_dirs
 from settings import Settings
 
 
-def livereload(card_books: List[Dict]) -> None:
+def livereload(
+        card_book_chunks: List[List[Dict]],
+        library_file_path: Union[str, Path]
+) -> None:
     """Auto reloading after edit template.html."""
 
     from livereload import Server
 
     def rebuild() -> None:
-        render_page(card_books=card_books)
-        print(f"{dt.now()} Page rebuilt")
+        for number_page, card_book_chunk in enumerate(card_book_chunks):
+            render_page(
+                card_books=card_book_chunk,
+                number_page=number_page + 1,
+                file_path=library_file_path
+            )
+        print(f"{dt.now()} Pages are rebuilt...")
 
     rebuild()
 
     server = Server()
-    server.watch('template.html', rebuild)
-    server.serve(root='.')
+    server.watch("template.html", rebuild)
+    server.serve(root=".", default_filename="pages/index1.html")
 
 
 def extract_json_data(file_path: str) -> List[Dict]:
@@ -36,7 +47,11 @@ def extract_json_data(file_path: str) -> List[Dict]:
     return list(card_books)
 
 
-def render_page(card_books: List[Dict]) -> None:
+def render_page(
+        card_books: List[Dict],
+        number_page: int,
+        file_path: Union[str, Path]
+) -> None:
     """Render page with template variables."""
 
     env = Environment(
@@ -49,8 +64,8 @@ def render_page(card_books: List[Dict]) -> None:
     rendered_page = template.render(
         card_books=card_books
     )
-
-    with open("index.html", "w", encoding="utf8") as file:
+    path_file = f"{file_path}/index{number_page}.html"
+    with open(path_file, mode="w", encoding="utf8") as file:
         file.write(rendered_page)
 
 
@@ -58,15 +73,28 @@ def main() -> None:
     """Render page from books description json file."""
 
     settings = Settings()
+    create_dirs("pages")
     file = os.path.join(
         sanitize_filepath(settings.ROOT_PATH),
         sanitize_filepath(settings.DESCRIPTION_FILE)
     )
+    library_file_path = sanitize_filepath(settings.LIBRARY_PATH)
+
     card_books = extract_json_data(file)
-    render_page(card_books)
+    card_book_chunks = list(chunked(card_books, settings.PAGE_SIZE))
+
+    for number_page, card_book_chunk in enumerate(card_book_chunks):
+        render_page(
+            card_books=card_book_chunk,
+            number_page=number_page + 1,
+            file_path=library_file_path
+        )
 
     if settings.AUTO_RELOAD:
-        livereload(card_books=card_books)
+        livereload(
+            card_book_chunks=card_book_chunks,
+            library_file_path=library_file_path
+        )
 
 
 if __name__ == "__main__":

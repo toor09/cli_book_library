@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     ROOT_PATH: Path = Path("downloads")
     BOOK_PATH: Path = Path("books")
     IMG_PATH: Path = Path("img")
+    LIBRARY_PATH: Path = Path("pages")
     SITE_URL_ROOT: AnyHttpUrl
     SITE_URI_TXT: str
     DESCRIPTION_FILE: str
@@ -18,6 +19,7 @@ class Settings(BaseSettings):
     STATUS_FORCE_LIST: str = "429,500,502,503,504"
     ALLOWED_METHODS: str = "HEAD,GET,OPTIONS"
     AUTO_RELOAD: bool = False
+    PAGE_SIZE: int = 10
 
     @validator("STATUS_FORCE_LIST")
     def status_force_list(cls, v: str) -> List[int]:
