@@ -22,6 +22,9 @@ cp .env.example .env
     RETRY_COUNT=5
     STATUS_FORCE_LIST=429,500,502,503,504
     ALLOWED_METHODS=HEAD,GET,OPTIONS
+    AUTO_RELOAD=False
+    PAGE_SIZE=10
+    LIBRARY_PATH=pages
   </pre>
 </details>
 
@@ -75,10 +78,21 @@ python3 tululu_category.py
 ```
 python3 tululu_category.py -s 1 -e 5 -I true -T false -J folder/some -D /home/user/books-test
 ```
+- Для генерации `html` версии библиотеки вводим команду:
+```
+python3 render_website.py
+```
+В случае, если переменная окружения `AUTO_RELOAD=True` будет запущен веб-сервер для удобства локальной разработки с автоматической перезагрузкой в случае изменения шаблона `template.html`.
+Также можно задать кол-во книг на странице при помощи переменной окружения `PAGE_SIZE`. По умолчанию, `PAGE_SIZE=10`.
+При помощи переменной окружения `LIBRARY_PATH` задается местоположение, где будут находится сгенерированные html страницы. По умолчанию, `LIBRARY_PATH=pages`.
+
+- С демо html версией библиотеки можно ознакомится [здесь]():  
+![Screenshot](screenshot.png)
 - Для запуска линтеров используем команду:
 ```
 flake8 . && mypy . && isort .
 ```
+
 
 ## Цели проекта
 Код написан в образовательных целях на онлайн-курсе для веб-разработчиков [Devman](https://dvmn.org).

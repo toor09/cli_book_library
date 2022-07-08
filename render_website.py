@@ -15,7 +15,8 @@ from settings import Settings
 def livereload(
         card_book_chunks: List[List[Dict]],
         total_pages: int,
-        library_file_path: Union[str, Path]
+        library_file_path: Union[str, Path],
+        settings: Settings
 ) -> None:
     """Auto reloading after edit template.html."""
 
@@ -35,7 +36,10 @@ def livereload(
 
     server = Server()
     server.watch("template.html", rebuild)
-    server.serve(root=".", default_filename="pages/index1.html")
+    server.serve(
+        root=".",
+        default_filename=f"{settings.LIBRARY_PATH}/index1.html"
+    )
 
 
 def extract_json_data(file_path: str) -> List[Dict]:
@@ -101,7 +105,8 @@ def main() -> None:
         livereload(
             card_book_chunks=card_book_chunks,
             total_pages=total_pages,
-            library_file_path=library_file_path
+            library_file_path=library_file_path,
+            settings=settings
         )
 
 

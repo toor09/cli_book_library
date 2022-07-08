@@ -12,9 +12,9 @@ venv/
 *.pyo
 .DS_Store
 Thumbs.db
-downloads/
+# downloads/
 books/
 txt/
 *.txt
 index.html
-pages/
+# pages/
