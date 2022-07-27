@@ -83,13 +83,13 @@ def main() -> None:
 
     settings = Settings()
     create_dirs("pages")
-    file = os.path.join(
+    filepath = os.path.join(
         sanitize_filepath(settings.ROOT_PATH),
         sanitize_filepath(settings.DESCRIPTION_FILE)
     )
     library_file_path = sanitize_filepath(settings.LIBRARY_PATH)
 
-    card_books = extract_json_data(file)
+    card_books = extract_json_data(filepath)
     card_book_chunks = list(chunked(card_books, settings.PAGE_SIZE))
     total_pages = len(card_book_chunks)
 
