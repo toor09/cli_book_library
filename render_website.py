@@ -13,7 +13,7 @@ from settings import Settings
 
 
 def livereload(
-        card_book_chunks: List[List[Dict]],
+        book_card_chunks: List[List[Dict]],
         total_pages: int,
         library_file_path: Union[str, Path],
         settings: Settings
@@ -23,9 +23,9 @@ def livereload(
     from livereload import Server
 
     def rebuild() -> None:
-        for number_page, card_book_chunk in enumerate(card_book_chunks):
+        for number_page, book_card_chunk in enumerate(book_card_chunks):
             render_page(
-                card_books=card_book_chunk,
+                book_cards=book_card_chunk,
                 number_page=number_page + 1,
                 total_pages=total_pages,
                 file_path=library_file_path
@@ -35,7 +35,7 @@ def livereload(
     rebuild()
 
     server = Server()
-    server.watch("template.html", rebuild)
+    server.watch("static/html/template.html", rebuild)
     server.serve(
         root=".",
         default_filename=f"{settings.LIBRARY_PATH}/index1.html"
@@ -54,7 +54,7 @@ def extract_json_data(file_path: str) -> List[Dict]:
 
 
 def render_page(
-        card_books: List[Dict],
+        book_cards: List[Dict],
         number_page: int,
         total_pages: int,
         file_path: Union[str, Path]
@@ -69,7 +69,7 @@ def render_page(
     template = env.get_template("template.html")
 
     rendered_page = template.render(
-        card_books=card_books,
+        book_cards=book_cards,
         current_page=number_page,
         total_pages=total_pages
     )
@@ -89,13 +89,13 @@ def main() -> None:
     )
     library_file_path = sanitize_filepath(settings.LIBRARY_PATH)
 
-    card_books = extract_json_data(filepath)
-    card_book_chunks = list(chunked(card_books, settings.PAGE_SIZE))
-    total_pages = len(card_book_chunks)
+    book_cards = extract_json_data(filepath)
+    book_card_chunks = list(chunked(book_cards, settings.PAGE_SIZE))
+    total_pages = len(book_card_chunks)
 
-    for number_page, card_book_chunk in enumerate(card_book_chunks):
+    for number_page, book_card_chunk in enumerate(book_card_chunks):
         render_page(
-            card_books=card_book_chunk,
+            book_cards=book_card_chunk,
             number_page=number_page + 1,
             total_pages=total_pages,
             file_path=library_file_path
@@ -103,7 +103,7 @@ def main() -> None:
 
     if settings.AUTO_RELOAD:
         livereload(
-            card_book_chunks=card_book_chunks,
+            book_card_chunks=book_card_chunks,
             total_pages=total_pages,
             library_file_path=library_file_path,
             settings=settings
