@@ -62,7 +62,7 @@ def render_page(
     """Render page with template variables."""
 
     env = Environment(
-        loader=FileSystemLoader("."),
+        loader=FileSystemLoader("static/html"),
         autoescape=select_autoescape(["html", "xml"])
     )
 

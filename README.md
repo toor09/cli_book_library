@@ -1,8 +1,35 @@
-# Парсер книг с сайта tululu.org
+# Парсер книг с сайта tululu.org и Демо сайта библиотеки
 
-## Запуск
+## Установка парсера книг
 
 - Скачайте код.
+- Установите актуальную версию poetry в `UNIX`-подобных дистрибутивах с помощью команды:
+```
+curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python3 -
+```
+или в `Windows Powershell`:
+```
+(Invoke-WebRequest -Uri https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py -UseBasicParsing).Content | python -
+```
+- Добавьте к переменной окружения `$PATH` команду poetry:
+```
+source $HOME/.poetry/bin
+```
+- Установите виртуальное окружение в директории с проектом командой:
+```
+poetry config virtualenvs.in-project true
+```
+- Установите все зависимости (для установки без dev зависимостей можно добавить аргумент `--no-dev`):
+```
+poetry install
+```
+- Активируйте виртуальное окружение командой: 
+```
+source .venv/bin/activate
+```
+
+## Настройка переменных окружения
+
 - Cоздайте файл `.env` в директории проекта, на основе файла `.env.example` командой 
 (при необходимости скорректируйте значения переменных окружения):
 ```
@@ -28,31 +55,15 @@ cp .env.example .env
   </pre>
 </details>
 
-- Установите актуальную версию poetry в `UNIX`-подобных дистрибутивах с помощью команды:
+## Запуск линтеров
+
 ```
-curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python3 -
+flake8 . && mypy . && isort .
 ```
-или в `Windows Powershell`:
-```
-(Invoke-WebRequest -Uri https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py -UseBasicParsing).Content | python -
-```
-- Добавьте к переменной окружения `$PATH` команду poetry:
-```
-source $HOME/.poetry/bin
-```
-- Установите виртуальное окружение в директории с проектом командой:
-```
-poetry config virtualenvs.in-project true
-```
-- Установите все зависимости (для установки без dev зависимостей можно добавить аргумент `--no-dev`):
-```
-poetry install
-```
-- Активируйте виртуальное окружение командой: 
-```
-source .venv/bin/activate
-```
-- Для запуска скрипта по списку идентификаторов вводим команду:
+
+## Запуск парсера книг по идентификаторам
+
+- Для запуска парсера книг по списку идентификаторов вводим команду:
 ```
 python3 tululu.py
 ```
@@ -63,7 +74,10 @@ python3 tululu.py
 ```
 python3 tululu.py -s 50 -e 100
 ```
-- Для запуска скрипта по конкретной категории вводим команду:
+
+## Запуск парсера книг по конкретной категории
+
+- Для запуска парсера книг по конкретной категории вводим команду:
 ```
 python3 tululu_category.py
 ```
@@ -78,6 +92,8 @@ python3 tululu_category.py
 ```
 python3 tululu_category.py -s 1 -e 5 -I true -T false -J folder/some -D /home/user/books-test
 ```
+## Запуск демо сайта библиотеки
+
 - Для генерации `html` версии библиотеки вводим команду:
 ```
 python3 render_website.py
@@ -87,12 +103,7 @@ python3 render_website.py
 При помощи переменной окружения `LIBRARY_PATH` задается местоположение, где будут находится сгенерированные html страницы. По умолчанию, `LIBRARY_PATH=pages`.
 
 - С демо html версией библиотеки можно ознакомится [здесь](https://toor09.github.io/cli_book_library/pages/index1.html):  
-![Screenshot](screenshot.png)
-- Для запуска линтеров используем команду:
-```
-flake8 . && mypy . && isort .
-```
-
+![Screenshot](static/screenshot.png)
 
 ## Цели проекта
 Код написан в образовательных целях на онлайн-курсе для веб-разработчиков [Devman](https://dvmn.org).
