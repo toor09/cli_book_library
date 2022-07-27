@@ -1,10 +1,12 @@
 import json
 import os
 from datetime import datetime as dt
+from functools import partial
 from pathlib import Path
-from typing import Dict, List, Union
+from typing import Any, Dict, List, Union
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
+from livereload import Server
 from more_itertools import chunked
 from pathvalidate import sanitize_filepath
 
@@ -12,27 +14,35 @@ from download import create_dirs
 from settings import Settings
 
 
+def build_page(**kwargs: Any) -> None:
+    """Rebuild page after edit template.html."""
+    for page_number, book_card_chunk in enumerate(
+            kwargs["book_card_chunks"],
+            start=1
+    ):
+        render_page(
+            book_cards=book_card_chunk,
+            page_number=page_number,
+            pages_total=kwargs["pages_total"],
+            file_path=kwargs["library_file_path"]
+        )
+    print(f"{dt.now()} Pages are rebuilt...")
+
+
 def reload_live(
-        book_card_chunks: List[List[Dict]],
-        pages_total: int,
-        library_file_path: Union[str, Path],
-        settings: Settings
+    book_card_chunks: List[List[Dict]],
+    pages_total: int,
+    library_file_path: Union[str, Path],
+    settings: Settings
 ) -> None:
     """Auto reloading after edit template.html."""
 
-    from livereload import Server
-
-    def rebuild() -> None:
-        for page_number, book_card_chunk in enumerate(book_card_chunks):
-            render_page(
-                book_cards=book_card_chunk,
-                page_number=page_number + 1,
-                pages_total=pages_total,
-                file_path=library_file_path
-            )
-        print(f"{dt.now()} Pages are rebuilt...")
-
-    rebuild()
+    rebuild = partial(
+        build_page,
+        book_card_chunks=book_card_chunks,
+        pages_total=pages_total,
+        library_file_path=library_file_path
+    )
 
     server = Server()
     server.watch("static/html/template.html", rebuild)
@@ -93,10 +103,10 @@ def main() -> None:
     book_card_chunks = list(chunked(book_cards, settings.PAGE_SIZE))
     pages_total = len(book_card_chunks)
 
-    for page_number, book_card_chunk in enumerate(book_card_chunks):
+    for page_number, book_card_chunk in enumerate(book_card_chunks, start=1):
         render_page(
             book_cards=book_card_chunk,
-            page_number=page_number + 1,
+            page_number=page_number,
             pages_total=pages_total,
             file_path=library_file_path
         )

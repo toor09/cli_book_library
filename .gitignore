@@ -13,7 +13,7 @@ venv/
 .DS_Store
 Thumbs.db
 # downloads/
-books/
+# books/
 txt/
 *.txt
 index.html
