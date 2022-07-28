@@ -1,9 +1,10 @@
 import json
 import os
+from dataclasses import dataclass
 from datetime import datetime as dt
 from functools import partial
 from pathlib import Path
-from typing import Any, Dict, List, Union
+from typing import Dict, List, Union
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from livereload import Server
@@ -14,36 +15,39 @@ from download import create_dirs
 from settings import Settings
 
 
-def build_page(**kwargs: Any) -> None:
-    """Rebuild page after edit template.html."""
-    for page_number, book_card_chunk in enumerate(
-            kwargs["book_card_chunks"],
-            start=1
-    ):
+@dataclass
+class PageContext:
+    book_cards: List[List[Dict]]
+    pages_total: int
+    file_path: Union[str, Path]
+
+
+def build_pages(page: PageContext) -> None:
+    """Rebuild pages after edit template.html."""
+    for page_number, book_card_chunk in enumerate(page.book_cards, start=1):
         render_page(
             book_cards=book_card_chunk,
             page_number=page_number,
-            pages_total=kwargs["pages_total"],
-            file_path=kwargs["library_file_path"]
+            pages_total=page.pages_total,
+            file_path=page.file_path
         )
     print(f"{dt.now()} Pages are rebuilt...")
 
 
-def reload_live(
+def render_live(
     book_card_chunks: List[List[Dict]],
     pages_total: int,
     library_file_path: Union[str, Path],
     settings: Settings
 ) -> None:
     """Auto reloading after edit template.html."""
-
-    rebuild = partial(
-        build_page,
-        book_card_chunks=book_card_chunks,
+    page_context = PageContext(
+        book_cards=book_card_chunks,
         pages_total=pages_total,
-        library_file_path=library_file_path
+        file_path=library_file_path
     )
-
+    rebuild = partial(build_pages, page_context)
+    rebuild()
     server = Server()
     server.watch("static/html/template.html", rebuild)
     server.serve(
@@ -52,14 +56,14 @@ def reload_live(
     )
 
 
-def extract_json_data(file_path: str) -> List[Dict]:
-    """Return data from json file."""
+def extract_book_cards(file_path: str) -> List[Dict]:
+    """Return book_cards from file."""
 
-    load_file = open(file_path, mode="r")
-    card_books = (
-        card_book
-        for card_book in json.load(load_file)
-    )
+    with open(file_path, mode="r") as file:
+        card_books = (
+            card_book
+            for card_book in json.load(file)
+        )
     return list(card_books)
 
 
@@ -83,8 +87,8 @@ def render_page(
         current_page=page_number,
         pages_total=pages_total
     )
-    path_file = f"{file_path}/index{page_number}.html"
-    with open(path_file, mode="w", encoding="utf8") as file:
+    file_path = f"{file_path}/index{page_number}.html"
+    with open(file_path, mode="w", encoding="utf8") as file:
         file.write(rendered_page)
 
 
@@ -93,13 +97,13 @@ def main() -> None:
 
     settings = Settings()
     create_dirs("pages")
-    filepath = os.path.join(
+    file_path = os.path.join(
         sanitize_filepath(settings.ROOT_PATH),
         sanitize_filepath(settings.DESCRIPTION_FILE)
     )
     library_file_path = sanitize_filepath(settings.LIBRARY_PATH)
 
-    book_cards = extract_json_data(filepath)
+    book_cards = extract_book_cards(file_path)
     book_card_chunks = list(chunked(book_cards, settings.PAGE_SIZE))
     pages_total = len(book_card_chunks)
 
@@ -112,7 +116,7 @@ def main() -> None:
         )
 
     if settings.AUTO_RELOAD:
-        reload_live(
+        render_live(
             book_card_chunks=book_card_chunks,
             pages_total=pages_total,
             library_file_path=library_file_path,
